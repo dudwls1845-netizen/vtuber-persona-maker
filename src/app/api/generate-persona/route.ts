@@ -49,14 +49,8 @@ export async function POST(request: Request) {
     const selectedSpecies = pickRandom(SPECIES);
     const selectedQuirk = pickRandom(UNIQUE_LORE_QUIRKS);
 
-    // Compose Final Prompt for LLM
-    const characterPrompt = `이 유저의 MBTI는 ${mbti}이고 가치관은 ${value}이다. 목소리는 ${voiceTrait}하다. 이 성격을 바탕으로, [${selectedStyle}] 화풍으로 그려진 [${selectedSpecies}] 캐릭터를 만들어라. 서사에는 [${selectedQuirk}] 요소가 반영되어야 한다.`;
-
-    console.log("\n--- [Phase 3] Sending Prompt Payload to Gemini ---");
-    console.log(characterPrompt);
-    console.log("--------------------------------------------------\n");
-
-    const systemInstruction = `
+    // Compose Final Prompt for LLM with System Instructions merged
+    const characterPrompt = `
 You are an expert anime character designer and VTuber lore writer. 
 Generate a character based on the user's prompt. 
 You must respond ONLY with a valid JSON document matching this exact schema:
@@ -67,7 +61,16 @@ You must respond ONLY with a valid JSON document matching this exact schema:
   "music_genre": "이 캐릭터의 숏폼 티저용 Suno API 배경음악 장르/무드 (영문, 예: Dark synthwave with heavy bass)",
   "shorts_script": "생성된 캐릭터의 성격과 세계관(Lore) 말투가 100% 반영된 15초짜리 유튜브 쇼츠 데뷔용 대본. [행동 지문]과 대사, 구독 유도 포함."
 }
+
+[User Profile & Traits]
+이 유저의 MBTI는 ${mbti}이고 가치관은 ${value}이다. 목소리는 ${voiceTrait}하다. 이 성격을 바탕으로, [${selectedStyle}] 화풍으로 그려진 [${selectedSpecies}] 캐릭터를 만들어라. 서사에는 [${selectedQuirk}] 요소가 반영되어야 한다.
+
+CRITICAL INSTRUCTION: Return ONLY standard JSON. Do not include markdown formatting (like \`\`\`json) or any other text before or after the JSON object.
 `;
+
+    console.log("\n--- [Phase 3] Sending Prompt Payload to Gemini ---");
+    console.log(characterPrompt);
+    console.log("--------------------------------------------------\n");
 
     let personaData;
     
@@ -78,14 +81,7 @@ You must respond ONLY with a valid JSON document matching this exact schema:
       }
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel(
-        { 
-          model: "gemini-1.5-flash",
-          systemInstruction,
-          generationConfig: { responseMimeType: "application/json" } 
-        },
-        { apiVersion: "v1beta" }
-      );
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1" });
 
       const result = await model.generateContent(characterPrompt);
 
