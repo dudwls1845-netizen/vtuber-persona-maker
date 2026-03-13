@@ -73,14 +73,14 @@ You must respond ONLY with a valid JSON document matching this exact schema:
     
     try {
       const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey || apiKey === "여기에_키_입력") {
-        throw new Error("GEMINI_API_KEY is not configured properly in .env.local");
+      if (!apiKey || apiKey.trim() === "" || apiKey === "여기에_키_입력") {
+        throw new Error("GEMINI_API_KEY is missing or invalid in server environment (.env.local)");
       }
 
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel(
         { 
-          model: "models/gemini-1.5-flash",
+          model: "gemini-1.5-flash-latest",
           systemInstruction,
           generationConfig: { responseMimeType: "application/json" } 
         },
