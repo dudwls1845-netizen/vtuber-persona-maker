@@ -84,7 +84,7 @@ You must respond ONLY with a valid JSON document matching this exact schema:
           systemInstruction,
           generationConfig: { responseMimeType: "application/json" } 
         },
-        { apiVersion: "v1" }
+        { apiVersion: "v1beta" }
       );
 
       const result = await model.generateContent(characterPrompt);
