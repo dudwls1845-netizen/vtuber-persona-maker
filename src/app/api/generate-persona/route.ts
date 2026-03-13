@@ -98,16 +98,10 @@ You must respond ONLY with a valid JSON document matching this exact schema:
       // Attempt parse
       personaData = JSON.parse(cleanJsonString.trim());
     } catch (apiError: any) {
-      console.error("Gemini API Error (Fallback to Mock):", apiError);
-      
-      // Fallback Mock Data so the frontend UI can still be tested even if the API Key has quota issues (429)
-      personaData = {
-        character_name: "루미나 에테르 (Lumina Aether)",
-        lore: `과거의 기억을 잃은 채 낡은 회중시계의 초침 소리에만 의존하며 세계를 유랑하는 정령. 인간의 감정을 이해하지 못해 차가워 보이지만, 사실 누구보다도 잃어버린 온기를 되찾고 싶어 한다. 안경 너머로 세상을 관찰하며, 매일 밤 부서진 부품들을 조립해 새로운 생명을 불어넣는 의식을 치른다.`,
-        image_prompt: `A beautiful anime spirit VTuber, silver glowing hair, wearing matte gold thick-rimmed glasses, holding a glowing antique pocket watch, dark dystopian background, highly detailed, masterpieces, 8k resolution, cinematic lighting`,
-        music_genre: `Melancholic classical piano with dark synthwave undertones and heavy bass`,
-        shorts_script: `[시계 초침 소리가 째깍거린다. 안경을 밀어올리며 카메라를 무심하게 응시하는 루미나]\n루미나: "...당신도, 고장 난 시간을 살아가는 사람인가요?"\n[주머니에서 빛나는 회중시계를 꺼내 보여준다]\n루미나: "상관없어요. 내가 다시 조립해줄 테니까. 당신의 잃어버린 시간, 나 루미나 에테르와 함께 찾고 싶다면... 구독, 해두는 게 좋을 거예요."\n[차가운 미소를 지으며 시계를 닫는다]`
-      };
+      console.error("Gemini API Error (No Fallback):", apiError);
+      return NextResponse.json({ 
+        error: apiError?.message || apiError?.statusText || String(apiError) 
+      }, { status: 500 });
     }
 
     return NextResponse.json({ 

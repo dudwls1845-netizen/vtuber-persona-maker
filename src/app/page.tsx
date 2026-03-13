@@ -34,11 +34,11 @@ export default function Home() {
       });
 
       const data = await response.json();
-      if (data.success && data.persona) {
+      if (response.ok && data.success && data.persona) {
         setPersonaData(data.persona);
       } else {
         console.error("Failed to generate persona:", data.error);
-        setErrorMessage(data.error || "API 호출 실패: 에러를 확인하세요.");
+        setErrorMessage(`생성 실패: ${data.error || "알 수 없는 에러가 발생했습니다."}`);
       }
     } catch (error) {
       console.error(error);
