@@ -78,11 +78,14 @@ You must respond ONLY with a valid JSON document matching this exact schema:
       }
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        systemInstruction,
-        generationConfig: { responseMimeType: "application/json" } 
-      });
+      const model = genAI.getGenerativeModel(
+        { 
+          model: "gemini-1.5-flash",
+          systemInstruction,
+          generationConfig: { responseMimeType: "application/json" } 
+        },
+        { apiVersion: "v1" }
+      );
 
       const result = await model.generateContent(characterPrompt);
 
