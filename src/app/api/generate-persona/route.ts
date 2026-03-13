@@ -56,14 +56,6 @@ export async function POST(request: Request) {
     console.log(characterPrompt);
     console.log("--------------------------------------------------\n");
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === "여기에_키_입력") {
-      throw new Error("GEMINI_API_KEY is not configured properly in .env.local");
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: { responseMimeType: "application/json" } });
-
     const systemInstruction = `
 You are an expert anime character designer and VTuber lore writer. 
 Generate a character based on the user's prompt. 
@@ -80,10 +72,19 @@ You must respond ONLY with a valid JSON document matching this exact schema:
     let personaData;
     
     try {
-      const result = await model.generateContent([
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey || apiKey === "여기에_키_입력") {
+        throw new Error("GEMINI_API_KEY is not configured properly in .env.local");
+      }
+
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash",
         systemInstruction,
-        { text: characterPrompt }
-      ]);
+        generationConfig: { responseMimeType: "application/json" } 
+      });
+
+      const result = await model.generateContent(characterPrompt);
 
       const responseText = result.response.text();
       
@@ -94,7 +95,7 @@ You must respond ONLY with a valid JSON document matching this exact schema:
       // Attempt parse
       personaData = JSON.parse(cleanJsonString.trim());
     } catch (apiError: any) {
-      console.error("Gemini API Error (Fallback to Mock):", apiError?.statusText || apiError);
+      console.error("Gemini API Error (Fallback to Mock):", apiError);
       
       // Fallback Mock Data so the frontend UI can still be tested even if the API Key has quota issues (429)
       personaData = {
