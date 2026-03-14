@@ -46,6 +46,7 @@ export default function Home() {
   const [personaData, setPersonaData] = useState<PersonaData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState("");
 
   const handleSurveyComplete = (payload: AnswerPayload) => {
     setDisplayTraits(payload.displayTraits);
@@ -58,9 +59,9 @@ export default function Home() {
     setPhase("final");
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      if (!apiKey || apiKey.trim() === "" || apiKey === "여기에_키_입력") {
-        throw new Error("NEXT_PUBLIC_GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.");
+      const apiKey = apiKeyInput.trim() || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      if (!apiKey || apiKey === "여기에_키_입력") {
+        throw new Error("API 키가 입력되지 않았거나 NEXT_PUBLIC_GEMINI_API_KEY가 없습니다.");
       }
 
       const { mbti, value } = analyzeTraits(internalTraits);
@@ -87,7 +88,7 @@ CRITICAL INSTRUCTION: Return ONLY standard JSON. Do not include markdown formatt
 `;
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-flash" }, { apiVersion: "v1" });
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
       const result = await model.generateContent(characterPrompt);
       const responseText = result.response.text();
@@ -117,7 +118,22 @@ CRITICAL INSTRUCTION: Return ONLY standard JSON. Do not include markdown formatt
 
       <AnimatePresence mode="wait">
         {phase === "survey" && (
-          <SurveyContainer key="survey" onComplete={handleSurveyComplete} />
+          <div key="survey" className="w-full flex w-full flex-col items-center">
+            <div className="mb-4 flex flex-col items-center w-full max-w-sm gap-2 z-10">
+              <label htmlFor="apiKey" className="text-gray-400 text-xs font-semibold tracking-wider">
+                TEST API KEY (선택)
+              </label>
+              <input 
+                id="apiKey"
+                type="password"
+                placeholder="키를 직접 입력하세요"
+                value={apiKeyInput}
+                onChange={(e) => setApiKeyInput(e.target.value)}
+                className="w-full bg-white/5 border border-purple-500/30 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+              />
+            </div>
+            <SurveyContainer onComplete={handleSurveyComplete} />
+          </div>
         )}
 
         {phase === "results" && (
