@@ -87,7 +87,7 @@ CRITICAL INSTRUCTION: Return ONLY standard JSON. Do not include markdown formatt
 `;
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-flash" }, { apiVersion: "v1" });
 
       const result = await model.generateContent(characterPrompt);
       const responseText = result.response.text();
